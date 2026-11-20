@@ -105,10 +105,11 @@ pre code{background:none;padding:0;color:var(--text);font-size:13px}
 <a class="toc-3" href="#sec-56">10.10 新增文件显示红色，且 pathspec did not match any file(s) known to git</a>
 <a class="toc-3" href="#sec-57">10.11 ~$xxx.docx 这类临时锁文件出现在 Untracked files</a>
 <a class="toc-3" href="#sec-58">10.12 本地已 git init，如何把目录内容推到远程仓库</a>
-<a class="toc-2" href="#sec-59">11. 常用命令速查表</a>
-<a class="toc-2" href="#sec-60">12. 推荐配置清单</a>
-<a class="toc-2" href="#sec-61">13. 建议的操作顺序</a>
-<a class="toc-2" href="#sec-62">14. 延伸学习</a>
+<a class="toc-3" href="#sec-59">10.13 修改 GitHub 仓库名称（Repository rename）</a>
+<a class="toc-2" href="#sec-60">11. 常用命令速查表</a>
+<a class="toc-2" href="#sec-61">12. 推荐配置清单</a>
+<a class="toc-2" href="#sec-62">13. 建议的操作顺序</a>
+<a class="toc-2" href="#sec-63">14. 延伸学习</a>
   </aside>
   <main>
     <h1 id="sec-1">Git 操作指南 —— 以 JiangWorkpalce 仓库为例</h1>
@@ -676,8 +677,27 @@ git push -u origin main</code></pre></div>
 <div class="code-block"><span class="lang">bash</span><button class="copy" type="button" aria-label="复制代码">复制</button><pre><code>git remote -v
 git status -sb          # 应显示 ## main...origin/main
 git log --oneline -3</code></pre></div>
+<h3 id="sec-59">10.13 修改 GitHub 仓库名称（Repository rename）</h3>
+<p><strong>网页端操作</strong>（需要管理员权限）：</p>
+<ol><li>打开仓库主页 → 点击 <strong>Settings</strong>（若看不到该标签，点仓库名旁的下拉菜单选 Settings）</li><li>在 <strong>General</strong> 页找到 <strong>Repository name</strong> 输入框</li><li>输入新名称 → 点击 <strong>Rename</strong></li></ol>
+<p>命令行方式（需安装 GitHub CLI）：</p>
+<div class="code-block"><span class="lang">bash</span><button class="copy" type="button" aria-label="复制代码">复制</button><pre><code>gh repo rename 新名称 -R 当前仓库</code></pre></div>
+<p><strong>改名后的影响：</strong></p>
+<ul><li>提交历史、分支、Issues、Star、Watch、Wiki 全部保留，旧网址自动重定向到新网址</li><li><code>git clone</code> / <code>fetch</code> / <code>push</code> 用旧地址仍能工作，但<strong>强烈建议更新本地远程地址</strong></li><li><strong>不会</strong>重定向：GitHub Pages 项目站点网址、引用了该仓库 Action 的工作流（会报 repository not found）</li><li>日后在同账号下新建仓库时<strong>不要复用旧名称</strong>，否则重定向会失效</li></ul>
+<p><strong>每个本地 clone 都要同步更新远程地址：</strong></p>
+<div class="code-block"><span class="lang">bash</span><button class="copy" type="button" aria-label="复制代码">复制</button><pre><code># HTTPS
+git remote set-url origin https://github.com/用户名/新名称.git
+
+# SSH
+git remote set-url origin git@github.com:用户名/新名称.git
+
+# 验证
+git remote -v
+git fetch origin        # 测试连接</code></pre></div>
+<p>还应手动更新项目文档、配置文件里引用旧仓库 URL 的地方（如 README.md、package.json），并通知协作者更新他们本地的 remote。</p>
+<blockquote><p>如果只想改分支名（如 master → main），不需要改名仓库，用 <code>git branch -M 新分支名</code> 即可。</p></blockquote>
 <hr>
-<h2 id="sec-59">11. 常用命令速查表</h2>
+<h2 id="sec-60">11. 常用命令速查表</h2>
 <div class="code-block"><span class="lang">text</span><button class="copy" type="button" aria-label="复制代码">复制</button><pre><code>git status                     查看状态
 git add .                      暂存全部改动
 git commit -m &quot;message&quot;        提交
@@ -693,7 +713,7 @@ git restore &lt;file&gt;             丢弃工作区改动
 git reflog                     查看所有操作记录
 git remote -v                  查看远程仓库</code></pre></div>
 <hr>
-<h2 id="sec-60">12. 推荐配置清单</h2>
+<h2 id="sec-61">12. 推荐配置清单</h2>
 <p>新机器可一次性粘贴执行（把身份信息换成你自己的）：</p>
 <div class="code-block"><span class="lang">bash</span><button class="copy" type="button" aria-label="复制代码">复制</button><pre><code>git config --global user.name &quot;你的名字&quot;
 git config --global user.email &quot;你的GitHub邮箱&quot;
@@ -708,11 +728,11 @@ git config --global --unset http.proxy 2&gt;/dev/null
 git config --global --unset https.proxy 2&gt;/dev/null
 git config --global --list</code></pre></div>
 <hr>
-<h2 id="sec-61">13. 建议的操作顺序</h2>
+<h2 id="sec-62">13. 建议的操作顺序</h2>
 <p>如果你现在就要开始，按这个顺序走最稳：</p>
 <ol><li>核对仓库名是否真的叫 <code>JiangWorkpalce</code></li><li>执行第 12 节的推荐配置</li><li>创建 PAT 并执行第 2.3 节的凭据配置</li><li>用 <code>git ls-remote &lt;URL&gt;</code> 验证认证与网络</li><li>执行第 3.1 节克隆仓库</li><li>日常开发重复第 5 节的 add → commit → push 循环</li><li>出问题时先查第 10 节</li></ol>
 <hr>
-<h2 id="sec-62">14. 延伸学习</h2>
+<h2 id="sec-63">14. 延伸学习</h2>
 <ul><li><a href="https://git-scm.com/book/zh/v2" target="_blank" rel="noopener">Pro Git 中文版（官方免费）</a></li><li><a href="https://docs.github.com/zh/repositories/creating-and-managing-repositories/cloning-a-repository" target="_blank" rel="noopener">GitHub Docs：克隆仓库</a></li><li><a href="https://docs.github.com/zh/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank" rel="noopener">GitHub Docs：管理个人访问令牌</a></li><li><a href="https://learngitbranching.js.org/?locale=zh_CN" target="_blank" rel="noopener">交互式学习 Git</a></li></ul>
   </main>
 </div>

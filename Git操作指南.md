@@ -849,6 +849,45 @@ git status -sb          # 应显示 ## main...origin/main
 git log --oneline -3
 ```
 
+### 10.13 修改 GitHub 仓库名称（Repository rename）
+
+**网页端操作**（需要管理员权限）：
+
+1. 打开仓库主页 → 点击 **Settings**（若看不到该标签，点仓库名旁的下拉菜单选 Settings）
+2. 在 **General** 页找到 **Repository name** 输入框
+3. 输入新名称 → 点击 **Rename**
+
+命令行方式（需安装 GitHub CLI）：
+
+```bash
+gh repo rename 新名称 -R 当前仓库
+```
+
+**改名后的影响：**
+
+- 提交历史、分支、Issues、Star、Watch、Wiki 全部保留，旧网址自动重定向到新网址
+- `git clone` / `fetch` / `push` 用旧地址仍能工作，但**强烈建议更新本地远程地址**
+- **不会**重定向：GitHub Pages 项目站点网址、引用了该仓库 Action 的工作流（会报 repository not found）
+- 日后在同账号下新建仓库时**不要复用旧名称**，否则重定向会失效
+
+**每个本地 clone 都要同步更新远程地址：**
+
+```bash
+# HTTPS
+git remote set-url origin https://github.com/用户名/新名称.git
+
+# SSH
+git remote set-url origin git@github.com:用户名/新名称.git
+
+# 验证
+git remote -v
+git fetch origin        # 测试连接
+```
+
+还应手动更新项目文档、配置文件里引用旧仓库 URL 的地方（如 README.md、package.json），并通知协作者更新他们本地的 remote。
+
+> 如果只想改分支名（如 master → main），不需要改名仓库，用 `git branch -M 新分支名` 即可。
+
 ---
 
 ## 11. 常用命令速查表
